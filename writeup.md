@@ -3,15 +3,15 @@
 The goals / steps of this project are the following:
 
 * Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
+* Optionally, apply a color transform and append binned color features, as well as histograms of color, to the HOG feature vector. 
+* Note: for those first two steps, normalize the features and randomize a selection for training and testing.
+* Implement a sliding-window technique and use the trained classifier to search for vehicles in images.
 * Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: ./output_images/car.png
-[image2]: ./output_images/notcar.png
+[image1]: ./output_images/car_notcar.png
+[image2]: ./output_images/car_hog.png
 [image3]: ./output_images/test1_bboxes.png
 [image4]: ./output_images/test1_threshold.png
 [video1]: ./P5_project_vid.mp4
@@ -30,14 +30,13 @@ This README serves this purpose.
  
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-![car][image1]
-![notcar][image2]
+![carnotcar][image1]
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+Here is an example using the `YCrCb` color space of the `vehicle` class example above. The HOG parameters used for feature extraction were `orientations=11`, `pixels_per_cell=(16, 16)` and `cells_per_block=(2, 2)`:
 
-
+![car_hog][image2]
 
 
 ### 2. Explain how you settled on your final choice of HOG parameters.
