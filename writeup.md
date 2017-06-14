@@ -27,6 +27,8 @@ This README serves this purpose.
 ## Histogram of Oriented Gradients (HOG)
 
 ### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+
+The first two code cells contain functions that were provided in the lectures. The third cell contains the code for loading the image data and doing some example HOG feature extractions and visualizations. 
  
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -41,11 +43,27 @@ Here is an example using the `YCrCb` color space of the `vehicle` class example 
 
 ### 2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+Through some internet research I was able to determine that using `YUV` or `YCrCb` were most likely to be successful. I initially tried `YUV` but saw an error in channel 2 that I never fully resolved. `YCrCb` seemed to be working well (much better than `RGB`), so I began working with that color space and started tweaking the other parameters. The information provided by a reviewer and shared by a student [here](https://discussions.udacity.com/t/good-tips-from-my-reviewer-for-this-vehicle-detection-project/232903) was helpful in determining the settings for the feature extraction. 
+
+I selected the following settings through trial and error:
+
+| Color Space      | YCrCb  |  
+| Orientations     | 11     | 
+| Pixels per cell  | 16     | 
+| Cells per block  | 2      | 
+| HOG channels     |  ALL   |  
+| Spatial size     | (16,16) |
+| Histogram bins   | 16     |
+
+These settings produced the highest accuracy from the SVC classifier (0.984 - 0.985). 
+
 
 ### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+The 4th code block shows the `LinearSVC()` classifier. This is a Support Vector Machine (SVM) classifier, and the SVC stands for Support Vector Classification. `LinearSVC()` works well on large data sets. 
+
+Before being fed into the classifier, the data was scaled using `StandardScaler()`. Then the data was split into a training set and a test set. 80% was randomly put into the training set, and the remaining 20% was put into the test set. The training typically took less than 10 sec to perform, and resulted in an accuracy of about 0.985.
+
 
 ## Sliding Window Search
 
@@ -66,7 +84,7 @@ Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spat
 ##  Video Implementation
 
 ### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./P5_project_vid.mp4)
 
 
 ### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
