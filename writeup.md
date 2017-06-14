@@ -51,6 +51,8 @@ Through some internet research I was able to determine that using `YUV` or `YCrC
 
 I selected the following settings through trial and error:
 
+| Parameter | Setting |
+|:-------------:|:------:|
 | Color Space      | YCrCb  |  
 | Orientations     | 11     | 
 | Pixels per cell  | 16     | 
@@ -59,7 +61,7 @@ I selected the following settings through trial and error:
 | Spatial size     | (16,16) |
 | Histogram bins   | 16     |
 
-These settings produced the highest accuracy from the SVC classifier (0.984 - 0.985). 
+These settings produced the highest accuracy from the SVC classifier (0.987). 
 
 
 ### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
@@ -75,7 +77,7 @@ Before being fed into the classifier, the data was scaled using `StandardScaler(
 
 The 5th cell shows the sliding window search implementation. Window size of (96, 96) was selected along with an overlap of 0.75. These settings were chosen by trial and error involving iterating and improving the algorithm performance based on the video results. 
 
-These images show the returns from the sliding windows search. They are from the provided test_images set, test1.png and test6.png respectively.  
+These images show the returns from the sliding windows search. They are from the provided test_images set, `test1.png` and `test6.png` respectively.  
 
 ![test1][image3]
 ![test6][image4]
@@ -83,9 +85,11 @@ These images show the returns from the sliding windows search. They are from the
 
 ### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-A threshold is applied to the result from the sliding windows search. The thresholding is set so that it only returns areas of overlapping boxes. These images are the same two test images as above, but now with threholding applied so that a single box is returned for each identified vehicle. 
+A threshold is applied to the result from the sliding windows search. The thresholding is set so that it only returns areas of overlapping boxes. These images are the same two test images as above, but now with thresholding applied so that a single box is returned for each identified vehicle. 
 
 Note that, as these images show, this thresholded result does not always perfectly encompass the vehicle. It can be tricky to come up with a single threshold value for the entire video. It may be that a dynamic thresholding approach would improve performance.  
+
+Threshold as applied to `test1.png` and `test6.png` respectively.  
 
 ![test1][image5]
 ![test6][image6]
