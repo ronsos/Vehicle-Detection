@@ -13,7 +13,11 @@ The goals / steps of this project are the following:
 [image1]: ./output_images/car_notcar.png
 [image2]: ./output_images/car_hog.png
 [image3]: ./output_images/test1_bboxes.png
-[image4]: ./output_images/test1_threshold.png
+[image4]: ./output_images/test6_bboxes.png
+[image5]: ./output_images/test1_threshold.png
+[image6]: ./output_images/test6_threshold.png
+[image7]: ./output_images/test1_heat.png
+[image8]: ./output_images/test6_heat.png
 [video1]: ./P5_project_vid.mp4
 
 Each of the points in the project [rubric](https://review.udacity.com/#!/rubrics/513/view) will be addressed in the description below. 
@@ -62,22 +66,29 @@ These settings produced the highest accuracy from the SVC classifier (0.984 - 0.
 
 The 4th code block shows the `LinearSVC()` classifier. This is a Support Vector Machine (SVM) classifier, and the SVC stands for Support Vector Classification. `LinearSVC()` works well on large data sets. 
 
-Before being fed into the classifier, the data was scaled using `StandardScaler()`. Then the data was split into a training set and a test set. 80% was randomly put into the training set, and the remaining 20% was put into the test set. The training typically took less than 10 sec to perform, and resulted in an accuracy of about 0.985.
+Before being fed into the classifier, the data was scaled using `StandardScaler()`. Then the data was split into a training set and a test set. 80% was randomly put into the training set, and the remaining 20% was put into the test set. The training typically took less than 10 sec to perform, and resulted in an accuracy of about 0.987.
 
 
 ## Sliding Window Search
 
 ### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+The 5th cell shows the sliding window search implementation. Window size of (96, 96) was selected along with an overlap of 0.75. These settings were chosen by trial and error involving iterating and improving the algorithm performance based on the video results. 
 
-![alt text][image3]
+These images show the returns from the sliding windows search. They are from the provided test_images set, test1.png and test6.png respectively.  
+
+![test1][image3]
+![test6][image4]
+
 
 ### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+A threshold is applied to the result from the sliding windows search. The thresholding is set so that it only returns areas of overlapping boxes. These images are the same two test images as above, but now with threholding applied so that a single box is returned for each identified vehicle. 
 
-![alt text][image4]
+Note that, as these images show, this thresholded result does not always perfectly encompass the vehicle. It can be tricky to come up with a single threshold value for the entire video. It may be that a dynamic thresholding approach would improve performance.  
+
+![test1][image5]
+![test6][image6]
 
 ---
 
@@ -89,20 +100,16 @@ Here's a [link to my video result](./P5_project_vid.mp4)
 
 ### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+The set of bounding boxes from the sliding windows search is used to generate a heat map. Basically, for any pixel inside a bounding box, a value of 1 is added to the heat map for that pixel (starting from zero for all pixels). Each of the bounding boxes is considered when applying the heat map. Thus, any area of the frame that has multiple overlapping bounding boxes will generate a heat map value of greater than 1. 
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+The heat map results for test images `test1.png` and `test6.png` are as follows: 
 
-#### Here are six frames and their corresponding heatmaps:
+![test1][image7]
+![test6][image8]
 
-![alt text][image5]
+When analyzing the video, a simple frame by frame threshold was not sufficient for identifying the vehicles while keeping out false positives. Way too many false positives would show up with a threshold that was low enough to capture the vehicles. 
 
-#### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-#### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
+The approach that I selected was to use a `collections.deque` array for smoothing. This can be seen in the 6th cell, labeled "Pipeline". The size of the array was set to 10. For thresholding, the sum of the 10 heat maps was determined. If a particular pixel exceeded a threshold of 6, then it was applied to the final heat map that was used for generating the bounding boxes for that single frame of the video. The bounding boxes are found using the `scipy.ndimage.measurements.label()` function, overlaid on the image frame from the video, then stitched together to make the modified video showing the bounding boxes. 
 
 
 ---
@@ -111,5 +118,6 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The video result shows zero false positives, which is very good. However, it occasionally will drop a frame or two on the vehicle identification. This is the correct side of the ledger to err on, but the algorithm could be improved so that it does not lose the vehicle at all. The current thresholding is set as low as possible, i.e. it is the lowest value (6) that eliminated all false positives. One approach that might help is to increase the size of the collections.deque array so that the averaging is done over a large number of frames. This would allow a bit more fine control of the thresholding. However, it would slow down the video processing, probably by a fairly significant amount. 
 
+A second potential improvement is tighter bounding boxes around the vehicles. Some of the frames show boxes that are too small, others too large. A tighter resolution on the sliding windows search or more overlap could help with this. The threshold would need to be readjusted to fine tune this approach. (Full disclosure: I attempted this, but was unable to achieve a satifactory result). 
